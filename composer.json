@@ -1,0 +1,35 @@
+{
+  "name": "myonlinestore/skeleton",
+  "type": "library",
+  "description": "A skeleton to start a new MyOnlineStore component",
+  "homepage": "https://github.com/MyOnlineStore",
+  "license": "MIT",
+  "autoload": {
+    "psr-4": {
+      "MyOnlineStore\\Component\\": "src/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "MyOnlineStore\\Component\\Tests\\": "tests/"
+    }
+  },
+  "require": {
+    "php": "^7.0"
+  },
+  "require-dev": {
+    "escapestudios/symfony2-coding-standard": "^3.4",
+    "phpunit/phpunit": "^7.2",
+    "squizlabs/php_codesniffer": "^3.2"
+  },
+  "config": {
+    "vendor-dir": "vendor",
+    "preferred-install": {
+      "*": "dist"
+    },
+    "sort-packages": true,
+    "platform": {
+      "php": "7.0"
+    }
+  }
+}
