@@ -29,7 +29,7 @@
     },
     "sort-packages": true,
     "platform": {
-      "php": "7.0"
+      "php": "7.0.25"
     }
   }
 }
