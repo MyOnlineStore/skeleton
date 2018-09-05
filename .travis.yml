@@ -26,7 +26,7 @@ env:
     - SYMFONY_VERSION=""
 
 before_install:
-  - if [ "$SYMFONY_VERSION" != "" ]; then composer require --no-update symfony/framework-bundle "$SYMFONY_VERSION"; fi
+  - if [ "$SYMFONY_VERSION" != "" ]; then composer require --ignore-platform-reqs --no-update symfony/framework-bundle "$SYMFONY_VERSION"; fi
 
 install:
   - composer install --prefer-source
