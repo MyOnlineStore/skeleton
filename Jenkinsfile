@@ -68,7 +68,7 @@ pipeline {
         }
       }
       steps {
-        sh 'vendor/bin/phpunit --coverage-clover=var/ci/clover.xml --coverage-text=var/ci/coverage.txt --coverage-html=var/ci'
+        sh 'vendor/bin/phpunit --log-junit=var/ci/unit.junit --coverage-clover=var/ci/clover.xml --coverage-text=var/ci/coverage.txt --coverage-html=var/ci'
         script {
           COVERAGE_PERCENTAGE = sh (
             script: "awk -F':' '/^  Lines:/{print \$2}' var/ci/coverage.txt | awk {'print \$1'}",
@@ -76,12 +76,23 @@ pipeline {
           ).trim()
 
           if (COVERAGE_PERCENTAGE) {
-            step([$class: 'GitHubCommitStatusSetter', contextSource: [$class: 'ManuallyEnteredCommitContextSource', context: "continuous-integration/jenkins/coverage"], statusResultSource: [$class: 'ConditionalStatusResultSource', results: [[$class: 'AnyBuildResult', message: "${COVERAGE_PERCENTAGE}", state: 'SUCCESS']]]])
+            step([
+              $class: 'GitHubCommitStatusSetter',
+              contextSource: [
+                $class: 'ManuallyEnteredCommitContextSource',
+                context: "continuous-integration/jenkins/coverage"
+              ],
+              statusResultSource: [
+                $class: 'ConditionalStatusResultSource',
+                results: [[$class: 'AnyBuildResult', message: "${COVERAGE_PERCENTAGE}", state: 'SUCCESS']]
+              ]
+            ])
           }
         }
       }
       post {
         always {
+          junit allowEmptyResults: true, testResults: 'var/ci/unit.junit'
           step([
             $class: 'CloverPublisher',
             cloverReportDir: 'var/ci',
@@ -122,7 +133,12 @@ pipeline {
         }
       }
       steps {
-        sh "true"
+        sh 'vendor/bin/phpunit --log-junit=var/ci/integration.junit --testsuite=integration'
+      }
+      post {
+        always {
+          junit allowEmptyResults: true, testResults: 'var/ci/integration.junit'
+        }
       }
     }
     stage('Test: Functional') {
