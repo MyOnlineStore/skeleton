@@ -1,4 +1,27 @@
+# OSX
+**/.DS_Store
+
+# unison sync
+**/.unison.*
+
+# IDE
 /.idea
-/.DS_Store
+/.phpstorm_helpers
+/.vscode
+/.vs
+
+# composer
 /vendor
 /composer.lock
+
+# var
+/var/*
+!/var/cache
+/var/cache/*
+!var/cache/.gitkeep
+!/var/ci
+/var/ci/*
+!/var/ci/.gitkeep
+!/var/logs
+/var/logs/*
+!/var/logs/.gitkeep
