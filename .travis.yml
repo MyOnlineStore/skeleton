@@ -29,8 +29,8 @@ before_install:
   - if [ "$SYMFONY_VERSION" != "" ]; then composer require --ignore-platform-reqs --no-update symfony/framework-bundle "$SYMFONY_VERSION"; fi
 
 install:
-  - composer install --prefer-source
+  - composer install --prefer-source --ignore-platform-reqs
 
 before_script:
   - composer self-update
-  - composer install --prefer-source
+  - composer install --prefer-source --ignore-platform-reqs
