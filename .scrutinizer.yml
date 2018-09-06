@@ -17,8 +17,6 @@ build:
         stop_on_failure: true
     nodes:
         analysis:
-            resources:
-                cpus: 2
             project_setup:
                 override:
                     - 'true'
@@ -28,9 +26,9 @@ build:
                     -
                         command: phpcs-run
                         use_website_config: false
-        php70:
+        php72:
             environment:
-                php: "7.0"
+                php: "7.2"
             tests:
                 after:
                     -
@@ -38,16 +36,6 @@ build:
                         coverage:
                             file: 'clover.xml'
                             format: 'clover'
-                        on_node: 1
-                        idle_timeout: 600
-        php72:
-            environment:
-                php: "7.2"
-            tests:
-                after:
-                    -
-                        command: 'vendor/bin/phpunit'
-                        on_node: 1
                         idle_timeout: 600
 filter:
     excluded_paths:
