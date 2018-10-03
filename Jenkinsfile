@@ -22,7 +22,7 @@ pipeline {
         }
         stage('Permissions') {
           steps {
-            sh 'chmod ugo+rw var/cache var/log var/profiler var/ci'
+            sh 'chmod ugo+rw var/cache var/log var/ci'
           }
         }
       }
