@@ -1,55 +1,30 @@
 pipeline {
   agent any
   stages {
-    stage('Dependencies') {
-      when {
-        beforeAgent true
-        anyOf {
-          branch 'master'
-          branch 'release'
-          expression { return env.CHANGE_ID != null }
-        }
+    stage('Docker: Network') {
+      steps {
+        sh "docker network create ${BUILD_TAG}"
       }
+    }
+    stage('Dependencies') {
       parallel {
         stage('Composer') {
           agent {
-            docker {
-              image 'composer'
-              args '-v ${COMPOSER_CACHE_DIR}:${COMPOSER_CACHE_DIR}'
+            dockerfile {
+              dir 'docker/php'
+              args '-v ${COMPOSER_CACHE_DIR}:${COMPOSER_CACHE_DIR} --network ${BUILD_TAG} --network-alias php --network-alias php-xdebug'
               reuseNode true
             }
           }
-          steps  {
-            sh 'composer install --prefer-dist --optimize-autoloader --no-progress --no-interaction'
-          }
-        }
-        stage('Docker Network') {
           steps {
-            sh "docker network create ${BUILD_TAG}"
+            sh 'composer install --prefer-dist --no-progress --no-interaction --optimize-autoloader'
           }
         }
-      }
-      environment {
-        COMPOSER_CACHE_DIR = '/var/cache/composer'
-      }
-    }
-    stage('Cache') {
-      agent {
-        dockerfile {
-          dir 'docker/php'
-          reuseNode true
+        stage('Permissions') {
+          steps {
+            sh 'chmod ugo+rw var/cache var/log var/profiler var/ci'
+          }
         }
-      }
-      when {
-        beforeAgent true
-        anyOf {
-          branch 'master'
-          branch 'release'
-          expression { return env.CHANGE_ID != null }
-        }
-      }
-      steps {
-        sh "true"
       }
     }
     stage('Test: Unit') {
@@ -57,14 +32,6 @@ pipeline {
         dockerfile {
           dir 'docker/php-xdebug'
           reuseNode true
-        }
-      }
-      when {
-        beforeAgent true
-        anyOf {
-          branch 'master'
-          branch 'release'
-          expression { return env.CHANGE_ID != null }
         }
       }
       steps {
@@ -116,80 +83,13 @@ pipeline {
         }
       }
     }
-    stage('Test: Integration') {
-      agent {
-        dockerfile {
-          dir 'docker/php'
-          args "--network ${BUILD_TAG} --network-alias php --network-alias php-xdebug"
-          reuseNode true
-        }
-      }
-      when {
-        beforeAgent true
-        anyOf {
-          branch 'master'
-          branch 'release'
-          expression { return env.CHANGE_ID != null }
-        }
-      }
-      steps {
-        sh 'vendor/bin/phpunit --log-junit=var/ci/integration.junit --testsuite=integration'
-      }
-      post {
-        always {
-          junit allowEmptyResults: true, testResults: 'var/ci/integration.junit'
-        }
-      }
-    }
-    stage('Test: Functional') {
-      agent {
-        dockerfile {
-          dir 'docker/php'
-          args "--network ${BUILD_TAG} --network-alias php --network-alias php-xdebug"
-          reuseNode true
-        }
-      }
-      when {
-        beforeAgent true
-        anyOf {
-          branch 'master'
-          branch 'release'
-          expression { return env.CHANGE_ID != null }
-        }
-      }
-      steps {
-        sh "true"
-      }
-    }
-    stage('Test: Acceptance') {
-      agent {
-        dockerfile {
-          dir 'docker/php'
-          args "--network ${BUILD_TAG} --network-alias php --network-alias php-xdebug"
-          reuseNode true
-        }
-      }
-      when {
-        beforeAgent true
-        anyOf {
-          branch 'master'
-          branch 'release'
-          expression { return env.CHANGE_ID != null }
-        }
-      }
-      steps {
-        sh "true"
-      }
-    }
-    stage('Deployment') {
-      steps {
-        sh "true"
-      }
-    }
   }
   post {
     always {
       sh "docker network rm ${BUILD_TAG} || true"
     }
+  }
+  environment {
+    COMPOSER_CACHE_DIR = '/var/cache/composer'
   }
 }
